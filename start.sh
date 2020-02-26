@@ -15,16 +15,17 @@ if ! [ -d $DATA_DIR/$1 ]; then
 fi
 
 # Get server download info from minecraft.net
-SERVER_RAW=$( /usr/bin/curl -s https://www.minecraft.net/en-us/download/server/ | grep server.jar )
-SERVER_JAR=$( echo $SERVER_RAW | awk -F\" '{print $2}' )
-SERVER_VER=$( echo $SERVER_RAW | awk -F\> '{print $2}' | awk -F\< '{print $1}' )
+SERVER_RAW=$( /usr/bin/curl -s -I https://www.minecraft.net/en-us/download/server/ )
+SERVER_CODE=$( echo $SERVER_RAW | head -1 )
+SERVER_JAR=$( echo $SERVER_RAW | grep server.jar | awk -F\" '{print $2}' )
+SERVER_VER=$( echo $SERVER_RAW | grep server.jar | awk -F\> '{print $2}' | awk -F\< '{print $1}' )
 
 # Function to download the server.jar file
 get_server () {
   echo "Getting server.jar from minecraft.net..."
-  /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR
+  /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR  || { echo "Download failed"; exit 2; }
   echo "Writing version to $DATA_DIR/$1/server.version"
-  echo "$SERVER_VER" > $DATA_DIR/$1/server.version
+  echo "$SERVER_VER" > $DATA_DIR/$1/server.version || { echo "Write server version failed, permissions?"; exit 2; }
 }
 
 # Check to see if the server.jar file exists
