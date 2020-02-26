@@ -15,22 +15,16 @@ if ! [ -d $DATA_DIR/$1 ]; then
 fi
 
 # Get server download info from minecraft.net
-SERVER_RAW=$( /usr/bin/curl -s -I https://www.minecraft.net/en-us/download/server/ )
-SERVER_CODE=$( echo $SERVER_RAW | head -1 )
-SERVER_JAR=$( echo $SERVER_RAW | grep server.jar | awk -F\" '{print $2}' )
-SERVER_VER=$( echo $SERVER_RAW | grep server.jar | awk -F\> '{print $2}' | awk -F\< '{print $1}' )
-
-if ! [ $SERVER_CODE == "HTTP/2 200" ]; then
-  echo "Failed to get a good status for https://www.minecraft.net/en-us/download/server/"
-  exit 3;
-fi
+SERVER_RAW=$( /usr/bin/curl -s https://www.minecraft.net/en-us/download/server/ )
+SERVER_JAR=$( grep server.jar <<<$SERVER_RAW | awk -F\" '{print $2}' )
+SERVER_VER=$( grep server.jar <<<$SERVER_RAW | awk -F\> '{print $2}' | awk -F\< '{print $1}' )
 
 # Function to download the server.jar file
 get_server () {
   echo "Getting server.jar from minecraft.net..."
-  /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR  || { echo "Download failed"; exit 4; }
+  /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR  || { echo "Download failed"; exit 3; }
   echo "Writing version to $DATA_DIR/$1/server.version"
-  echo "$SERVER_VER" > $DATA_DIR/$1/server.version || { echo "Write server version failed, permissions?"; exit 5; }
+  echo "$SERVER_VER" > $DATA_DIR/$1/server.version || { echo "Write server version failed, permissions?"; exit 4; }
 }
 
 # Check to see if the server.jar file exists
@@ -53,10 +47,10 @@ fi
 # Check to see if the EULA has been agreed to
 if [[ `grep "eula=true" $DATA_DIR/$1/eula.txt` != *eula\=true* ]]; then
   echo "Accepting the EULA..."
-  echo "eula=true" > $DATA_DIR/$1/eula.txt || { echo "Write EULA failed, permissions?"; exit 6; }
+  echo "eula=true" > $DATA_DIR/$1/eula.txt || { echo "Write EULA failed, permissions?"; exit 5; }
 fi
 
 # Start Minecraft
 cd $DATA_DIR/$1
 echo "Starting minecraft..."
-$JAVA_DIR/java -Xmx8024M -Xms1024M -XX:+UseG1GC -jar server.jar nogui || { echo "Unable to run server...  shrug."; exit 7; }
+$JAVA_DIR/java -Xmx8024M -Xms1024M -XX:+UseG1GC -jar server.jar nogui || { echo "Unable to run server...  shrug."; exit 6; }
