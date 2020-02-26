@@ -2,6 +2,12 @@
 DATA_DIR="/mnt/e"
 JAVA_DIR="$DATA_DIR/jdk1.8.0_231/bin"
 
+# If we didn't add a data directory, bail and complain
+if [ -z $1 ]; then
+  echo "You need to add a data directory (or world) to start"
+  exit 2
+fi
+
 # Make data directory if it doesn't exist
 if ! [ -d $DATA_DIR/$1 ]; then
   echo "Making a new server directory..."
