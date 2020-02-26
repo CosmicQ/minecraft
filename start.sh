@@ -14,23 +14,26 @@ SERVER_VER=$( echo $SERVER_RAW | awk -F\> '{print $2}' | awk -F\< '{print $1}' )
 # If no server.jar, get one
 if ! [ -f $DATA_DIR/$1/server.jar ]; then
   echo "Getting server.jar from minecraft.net..."
-  /usr/bin/wget -O $DATA_DIR/$1/server.jar $SERVER_JAR
-  echo $SERVER_VER > $DATA_DIR/$1/server.version
+  /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR
+  echo "Writing version to $DATA_DIR/$1/server.version"
+  echo "$SERVER_VER" > $DATA_DIR/$1/server.version
 else
   echo "Checking for version update..."
-  LOCAL_VER=$( cat $DATA_DIR/$1/server.verion )
-  if ! [ $SERVER_VER == $LOCAL_VER ]; then
+  if ! [ $SERVER_VER == `cat $DATA_DIR/$1/server.version` ]; then
     # Version mismatch - get new version
-    /usr/bin/wget -O $DATA_DIR/$1/server.jar $SERVER_JAR
-    echo $SERVER_VER > $DATA_DIR/$1/server.version
+    /usr/bin/wget --quiet -O $DATA_DIR/$1/server.jar $SERVER_JAR
+    echo "Writing version to $DATA_DIR/$1/server.version"
+    echo "$SERVER_VER" > $DATA_DIR/$1/server.version
+  else
+    echo "Version is the same, skipping update"
   fi
 fi
 
 cd $DATA_DIR/$1
 echo "Starting minecraft..."
 
-if ! grep "eula=true" $DATA_DIR/$1/eula.txt; then
-  echo "Accepting the EULA"
+if [[ `grep "eula=true" $DATA_DIR/$1/eula.txt` != *eula\=true* ]]; then
+  echo "Accepting the EULA..."
   echo "eula=true" > $DATA_DIR/$1/eula.txt
 fi
 
