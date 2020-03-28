@@ -1,4 +1,6 @@
+Command line install for kubernetes on Centos 7
 
+```
 setenforce 0
 sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 modprobe br_netfilter
@@ -41,11 +43,12 @@ systemctl enable docker
 systemctl start docker
 systemctl enable kubelet
 systemctl start kubelet
+```
 
 Update /etc/hosts on all nodes
 
 Note: Complete the following section on the MASTER ONLY!
-
+```
 firewall-cmd --permanent --add-port=6443/tcp
 firewall-cmd --permanent --add-port=2379-2380/tcp
 firewall-cmd --permanent --add-port=10250/tcp
@@ -61,16 +64,17 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-Deploy Flannel:
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
 kubectl get pods --all-namespaces
+```
 
 Note: Complete the following steps on the NODES ONLY!
+```
 firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10255/tcp
 firewall-cmd --reload
+
 Run the join command that you copied earlier, this requires running the command prefaced with sudo on the nodes (if we hadn't run sudo su to begin with). Then we'll check the nodes from the master.
 
-
 kubectl get nodes
+```
