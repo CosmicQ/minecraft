@@ -59,8 +59,57 @@ Normally, we would run mincraft (in a container) like this:
 
 So for kubernetes, we do:
 `kubectl run --image=itzg/minecraft-server mc1 --port=25565 --env="EULA=TRUE"`
+
+To do a deployment:
+```bash
+cat<<"EOF">./mc1-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft
+spec:
+  type: NodePort
+  selector:
+    app: minecraft
+  ports:
+  - protocol: TCP
+    port: 25565
+    targetPort: 25565
+    nodePort: 32565
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft-deployment
+  labels:
+    app: minecraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      containers:
+      - name: minecraft
+        image: itzg/minecraft-server:latest
+        env:
+        - name: EULA
+          value: "TRUE"
+        ports:
+        - containerPort: 25565
+EOF
+
+```
+
+And then create the deployment
+`kubectl apply -f ./mc1-deployment.yaml`
+
 and then expose the deployment...
-`kubectl expose deployment mc1 --port 25565 --name=public-minecraft --external-ip=192.168.0.200`
+`kubectl expose deployment mc1 --port 25565 --name=public-minecraft --external-ip=192.168.1.5`
 
 Create the ingress:
 ```dotnetcli
