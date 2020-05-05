@@ -55,11 +55,14 @@ firewall-cmd --permanent --add-port=10250/tcp
 firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10252/tcp
 firewall-cmd --permanent --add-port=10255/tcp
-firewall-cmd –-reload
+firewall-cmd --reload
 
 kubeadm init --pod-network-cidr=10.11.0.0/16
+```
 Copy the kubeadmn join command that is in the output. We will need this later.
 Exit sudo, copy the admin.conf to your home directory, and take ownership.
+
+```
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
