@@ -76,3 +76,16 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 kubeadm join (get info from kubeadmin init on master)
 
 ```
+
+# Install istio
+
+```bash
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-1.5.2
+export PATH=$PWD/bin:$PATH
+istioctl manifest apply --set profile=demo
+kubectl label namespace default istio-injection=enabled
+
+kubectl apply -f <(istioctl kube-inject -f ./mc1-deployment.yaml)
+
+```
